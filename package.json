@@ -1,0 +1,26 @@
+{
+  "name": "web2b_ishan",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ixs92240ucmo/Web2b_ishan.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/ixs92240ucmo/Web2b_ishan/issues"
+  },
+  "homepage": "https://github.com/ixs92240ucmo/Web2b_ishan#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.2"
+  }
+}
