@@ -1,0 +1,46 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "serverName": { "type": "string" },
+    "dbName": { "type": "string" },
+    "adminUser": { "type": "string" },
+    "adminPassword": { "type": "securestring" },
+    "location": { "type": "string" }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.DBforMySQL/servers",
+      "apiVersion": "2017-12-01",
+      "name": "[parameters('serverName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "createMode": "Default",
+        "administratorLogin": "[parameters('adminUser')]",
+        "administratorLoginPassword": "[parameters('adminPassword')]",
+        "version": "5.7",
+        "sslEnforcement": "Enabled",
+        "storageProfile": {
+          "storageMB": 5120,
+          "backupRetentionDays": 7,
+          "geoRedundantBackup": "Disabled"
+        }
+      },
+      "sku": {
+        "name": "B_Gen5_1",
+        "tier": "Basic",
+        "capacity": 1,
+        "family": "Gen5"
+      }
+    },
+    {
+      "type": "Microsoft.DBforMySQL/servers/databases",
+      "apiVersion": "2017-12-01",
+      "name": "[concat(parameters('serverName'), '/', parameters('dbName'))]",
+      "dependsOn": [
+        "[resourceId('Microsoft.DBforMySQL/servers', parameters('serverName'))]"
+      ],
+      "properties": {}
+    }
+  ]
+}

@@ -1,0 +1,57 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "resources": [
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2021-04-01",
+      "name": "frontendDeployment",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "https://raw.githubusercontent.com/ixs92240ucmo/Web2b_ishan/main/arm-template/frontendModule.json",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "siteName": { "value": "frontend-app" },
+          "location": { "value": "East US" }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2021-04-01",
+      "name": "backendDeployment",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "https://raw.githubusercontent.com/ixs92240ucmo/Web2b_ishan/main/arm-template/backendModule.json",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "backendAppName": { "value": "backend-app" },
+          "location": { "value": "East US" }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2021-04-01",
+      "name": "databaseDeployment",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "https://raw.githubusercontent.com/ixs92240ucmo/Web2b_ishan/main/arm-template/databaseModule.json",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "serverName": { "value": "web2b-db-server" },
+          "dbName": { "value": "web2bdb" },
+          "adminUser": { "value": "adminuser" },
+          "adminPassword": { "value": "ReplaceThisWithASecurePassword123!" },
+          "location": { "value": "East US" }
+        }
+      }
+    }
+  ]
+}
