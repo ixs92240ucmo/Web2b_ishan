@@ -45,7 +45,7 @@
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
-          "serverName": { "value": "web2b-db-server" },
+          "serverName": { "value": "web2b-db-server-unique01" },
           "dbName": { "value": "web2bdb" },
           "adminUser": { "value": "azureuser" },
           "adminPassword": { "value": "Rostrumrox@1" },
