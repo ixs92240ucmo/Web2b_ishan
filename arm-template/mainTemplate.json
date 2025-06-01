@@ -47,7 +47,7 @@
         "parameters": {
           "serverName": { "value": "web2b-db-server" },
           "dbName": { "value": "web2bdb" },
-          "adminUser": { "value": "adminuser" },
+          "adminUser": { "value": "azureuser" },
           "adminPassword": { "value": "Rostrumrox@1" },
           "location": { "value": "East US" }
         }
