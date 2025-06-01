@@ -48,7 +48,7 @@
           "serverName": { "value": "web2b-db-server" },
           "dbName": { "value": "web2bdb" },
           "adminUser": { "value": "adminuser" },
-          "adminPassword": { "value": "ReplaceThisWithASecurePassword123!" },
+          "adminPassword": { "value": "Rostrumrox@1" },
           "location": { "value": "East US" }
         }
       }
