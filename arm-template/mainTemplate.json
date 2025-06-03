@@ -8,71 +8,121 @@
       "allowedValues": ["dev", "prod"]
     },
     "dbAdminPassword": {
-      "type": "securestring"
+      "type": "securestring",
+      "metadata": {
+        "description": "MySQL administrator password"
+      }
     }
   },
   "variables": {
     "uniqueSuffix": "[take(uniqueString(resourceGroup().id), 8)]",
     "frontendName": "[concat('frontend-', parameters('environment'), '-', variables('uniqueSuffix'))]",
     "backendName": "[concat('backend-', parameters('environment'), '-', variables('uniqueSuffix'))]",
-    "dbServerName": "[concat('mysql-', parameters('environment'), '-', variables('uniqueSuffix'))]"
+    "dbServerName": "[concat('mysql-', parameters('environment'), '-', variables('uniqueSuffix'))]",
+    "location": "[resourceGroup().location]",
+    "dbConnectionString": "[concat('Server=', variables('dbServerName'), '.mysql.database.azure.com;Database=webappdb;Uid=dbadmin;Pwd=', parameters('dbAdminPassword'), ';')]"
   },
   "resources": [
     {
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2021-04-01",
-      "name": "databaseDeployment",
+      "type": "Microsoft.DBforMySQL/flexibleServers",
+      "apiVersion": "2021-05-01",
+      "name": "[variables('dbServerName')]",
+      "location": "[variables('location')]",
+      "sku": {
+        "name": "B_Standard_B1s",
+        "tier": "Burstable"
+      },
       "properties": {
-        "mode": "Incremental",
-        "templateLink": {
-          "uri": "[uri(deployment().properties.templateLink.uri, 'databaseModule.json')]",
-          "contentVersion": "1.0.0.0"
+        "administratorLogin": "dbadmin",
+        "administratorLoginPassword": "[parameters('dbAdminPassword')]",
+        "version": "5.7",
+        "highAvailability": {
+          "mode": "ZoneRedundant"
         },
-        "parameters": {
-          "serverName": { "value": "[variables('dbServerName')]" },
-          "dbName": { "value": "webappdb" },
-          "adminUser": { "value": "dbadmin" },
-          "adminPassword": { "value": "[parameters('dbAdminPassword')]" },
-          "location": { "value": "[resourceGroup().location]" }
+        "storage": {
+          "storageSizeGB": 20
         }
       }
     },
     {
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2021-04-01",
-      "name": "backendDeployment",
-      "dependsOn": ["databaseDeployment"],
+      "type": "Microsoft.DBforMySQL/flexibleServers/databases",
+      "apiVersion": "2021-05-01",
+      "name": "[concat(variables('dbServerName'), '/webappdb')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.DBforMySQL/flexibleServers', variables('dbServerName'))]"
+      ],
+      "properties": {}
+    },
+    {
+      "type": "Microsoft.Web/serverfarms",
+      "apiVersion": "2021-02-01",
+      "name": "[concat(variables('backendName'), '-plan')]",
+      "location": "[variables('location')]",
+      "sku": {
+        "name": "P1v2",
+        "tier": "Premium",
+        "size": "P1v2",
+        "capacity": 1
+      },
       "properties": {
-        "mode": "Incremental",
-        "templateLink": {
-          "uri": "[uri(deployment().properties.templateLink.uri, 'backendModule.json')]",
-          "contentVersion": "1.0.0.0"
-        },
-        "parameters": {
-          "backendAppName": { "value": "[variables('backendName')]" },
-          "location": { "value": "[resourceGroup().location]" },
-          "dbConnectionString": {
-            "value": "[concat('Server=', variables('dbServerName'), '.mysql.database.azure.com;Database=webappdb;Uid=dbadmin;Pwd=', parameters('dbAdminPassword'), ';')]"
-          }
-        }
+        "perSiteScaling": true
       }
     },
     {
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2021-04-01",
-      "name": "frontendDeployment",
-      "dependsOn": ["backendDeployment"],
+      "type": "Microsoft.Web/sites",
+      "apiVersion": "2021-02-01",
+      "name": "[variables('backendName')]",
+      "location": "[variables('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.DBforMySQL/flexibleServers', variables('dbServerName'))]",
+        "[resourceId('Microsoft.Web/serverfarms', concat(variables('backendName'), '-plan'))]"
+      ],
       "properties": {
-        "mode": "Incremental",
-        "templateLink": {
-          "uri": "[uri(deployment().properties.templateLink.uri, 'frontendModule.json')]",
-          "contentVersion": "1.0.0.0"
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', concat(variables('backendName'), '-plan'))]",
+        "siteConfig": {
+          "appSettings": [
+            { "name": "NODE_ENV", "value": "production" },
+            { "name": "DB_CONNECTION", "value": "[variables('dbConnectionString')]" },
+            { "name": "WEBSITE_HEALTHCHECK_MAXPINGFAILURES", "value": "3" }
+          ],
+          "healthCheckPath": "/health"
         },
-        "parameters": {
-          "siteName": { "value": "[variables('frontendName')]" },
-          "location": { "value": "[resourceGroup().location]" }
-        }
+        "httpsOnly": true
+      },
+      "kind": "app"
+    },
+    {
+      "type": "Microsoft.Web/serverfarms",
+      "apiVersion": "2021-02-01",
+      "name": "[concat(variables('frontendName'), '-plan')]",
+      "location": "[variables('location')]",
+      "sku": {
+        "name": "F1",
+        "tier": "Free",
+        "size": "F1",
+        "capacity": 1
       }
+    },
+    {
+      "type": "Microsoft.Web/sites",
+      "apiVersion": "2021-02-01",
+      "name": "[variables('frontendName')]",
+      "location": "[variables('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', concat(variables('frontendName'), '-plan'))]",
+        "[resourceId('Microsoft.Web/sites', variables('backendName'))]"
+      ],
+      "properties": {
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', concat(variables('frontendName'), '-plan'))]",
+        "siteConfig": {
+          "appSettings": [
+            { "name": "NODE_ENV", "value": "production" },
+            { "name": "API_BASE_URL", "value": "[concat('https://', variables('backendName'), '.azurewebsites.net')]" }
+          ]
+        },
+        "httpsOnly": true
+      },
+      "kind": "app"
     }
   ],
   "outputs": {
@@ -83,6 +133,10 @@
     "backendUrl": {
       "type": "string",
       "value": "[concat('https://', variables('backendName'), '.azurewebsites.net')]"
+    },
+    "databaseServer": {
+      "type": "string",
+      "value": "[concat(variables('dbServerName'), '.mysql.database.azure.com')]"
     }
   }
 }

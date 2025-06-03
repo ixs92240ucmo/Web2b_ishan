@@ -6,7 +6,7 @@
       "value": "dev"
     },
     "dbAdminPassword": {
-      "value": "SecurePassword@123!"
+      "value": "YourSecurePassword123!"
     }
   }
 }
