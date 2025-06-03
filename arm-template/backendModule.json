@@ -3,7 +3,8 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "backendAppName": { "type": "string" },
-    "location": { "type": "string" }
+    "location": { "type": "string" },
+    "dbConnectionString": { "type": "securestring" }
   },
   "resources": [
     {
@@ -14,8 +15,11 @@
       "properties": {
         "siteConfig": {
           "appSettings": [
-            { "name": "NODE_ENV", "value": "production" }
-          ]
+            { "name": "NODE_ENV", "value": "production" },
+            { "name": "DB_CONNECTION", "value": "[parameters('dbConnectionString')]" },
+            { "name": "WEBSITE_HEALTHCHECK_MAXPINGFAILURES", "value": "3" }
+          ],
+          "healthCheckPath": "/health"
         },
         "httpsOnly": true
       },

@@ -7,15 +7,35 @@
   },
   "resources": [
     {
+      "type": "Microsoft.Web/serverfarms",
+      "apiVersion": "2021-02-01",
+      "name": "[concat(parameters('siteName'), '-plan')]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "P1v2",
+        "tier": "Premium",
+        "size": "P1v2",
+        "capacity": 1
+      },
+      "properties": {
+        "perSiteScaling": true
+      }
+    },
+    {
       "type": "Microsoft.Web/sites",
       "apiVersion": "2021-02-01",
       "name": "[parameters('siteName')]",
       "location": "[parameters('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', concat(parameters('siteName'), '-plan'))]"
+      ],
       "properties": {
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', concat(parameters('siteName'), '-plan'))]",
         "siteConfig": {
           "appSettings": [
             { "name": "NODE_ENV", "value": "production" }
-          ]
+          ],
+          "autoHealEnabled": true
         },
         "httpsOnly": true
       },

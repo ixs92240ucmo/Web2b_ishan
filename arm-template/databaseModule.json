@@ -10,35 +10,32 @@
   },
   "resources": [
     {
-      "type": "Microsoft.DBforMySQL/servers",
-      "apiVersion": "2017-12-01",
+      "type": "Microsoft.DBforMySQL/flexibleServers",
+      "apiVersion": "2021-05-01",
       "name": "[parameters('serverName')]",
       "location": "[parameters('location')]",
+      "sku": {
+        "name": "B_Standard_B1s",
+        "tier": "Burstable"
+      },
       "properties": {
-        "createMode": "Default",
         "administratorLogin": "[parameters('adminUser')]",
         "administratorLoginPassword": "[parameters('adminPassword')]",
         "version": "5.7",
-        "sslEnforcement": "Enabled",
-        "storageProfile": {
-          "storageMB": 5120,
-          "backupRetentionDays": 7,
-          "geoRedundantBackup": "Disabled"
+        "highAvailability": {
+          "mode": "ZoneRedundant"
+        },
+        "storage": {
+          "storageSizeGB": 20
         }
-      },
-      "sku": {
-        "name": "B_Gen5_1",
-        "tier": "Basic",
-        "capacity": 1,
-        "family": "Gen5"
       }
     },
     {
-      "type": "Microsoft.DBforMySQL/servers/databases",
-      "apiVersion": "2017-12-01",
+      "type": "Microsoft.DBforMySQL/flexibleServers/databases",
+      "apiVersion": "2021-05-01",
       "name": "[concat(parameters('serverName'), '/', parameters('dbName'))]",
       "dependsOn": [
-        "[resourceId('Microsoft.DBforMySQL/servers', parameters('serverName'))]"
+        "[resourceId('Microsoft.DBforMySQL/flexibleServers', parameters('serverName'))]"
       ],
       "properties": {}
     }
