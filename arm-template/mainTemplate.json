@@ -59,9 +59,9 @@
       "name": "[concat(variables('backendName'), '-plan')]",
       "location": "[variables('location')]",
       "sku": {
-        "name": "P1v2",
-        "tier": "Premium",
-        "size": "P1v2",
+        "name": "S1",
+        "tier": "Standard",
+        "size": "S1",
         "capacity": 1
       },
       "properties": {
@@ -97,9 +97,9 @@
       "name": "[concat(variables('frontendName'), '-plan')]",
       "location": "[variables('location')]",
       "sku": {
-        "name": "F1",
-        "tier": "Free",
-        "size": "F1",
+        "name": "B1",
+        "tier": "Basic",
+        "size": "B1",
         "capacity": 1
       }
     },
